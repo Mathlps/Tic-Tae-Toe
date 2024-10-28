@@ -1,111 +1,71 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import '/src/App.css';
-import { useState } from 'react';
-import { useEffect } from 'react';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-
+import Board from './assets/components/Board';
+import WinnerMessage from './assets/components/WinnerMessage';
 
 function TicTacToe() {
   const emptyBoard = Array(9).fill("");
 
   const [board, setBoard] = useState(emptyBoard);
-  const [currentPlayer, setCurrentPlayer]= useState("O");
-  const [winner, setWinner]= useState(null);
+  const [currentPlayer, setCurrentPlayer] = useState("O");
+  const [winner, setWinner] = useState(null);
 
-  const handleClick=(index)=>{
-    if (winner){
-      return null
-    }
-    
-    if (board[index] !== ""){
-      return null
+  const handleClick = (index) => {
+    if (winner || board[index] !== "") {
+      return;
     }
 
     setBoard(
-      board.map((item, itemIndex)=> itemIndex === index ? currentPlayer : item)
+      board.map((item, itemIndex) => (itemIndex === index ? currentPlayer : item))
     );
 
     setCurrentPlayer(currentPlayer === "X" ? "O" : "X");
-  }
+  };
 
-  const checkWinner = () =>{
-    const possibleWaysToWin=[
-      [board[0], board[1], board[2]],
-      [board[3], board[4], board[5]],
-      [board[6], board[7], board[8]],
-      
-      [board[0], board[3], board[6]],
-      [board[1], board[4], board[7]],
-      [board[2], board[5], board[8]],
-      
-      [board[2], board[4], board[6]],
-      [board[0], board[4], board[8]],
+  const checkWinner = () => {
+    const possibleWaysToWin = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6],
     ];
 
-    possibleWaysToWin.forEach(cells => {
-      if (cells.every(cell => cell === "O")) setWinner("O");
-      if (cells.every(cell => cell === "X")) setWinner("X");
-    })
+    possibleWaysToWin.forEach((cells) => {
+      if (cells.every((index) => board[index] === "O")) setWinner("O");
+      if (cells.every((index) => board[index] === "X")) setWinner("X");
+    });
 
     checkDraw();
-  }
+  };
 
   const checkDraw = () => {
-    if (board.every(item => item !== "") && !winner) {
+    if (board.every((item) => item !== "") && !winner) {
       setWinner("E");
     }
-  }
+  };
 
   useEffect(() => {
     checkWinner();
   }, [board]);
 
-  const resetGame=() =>{
+  const resetGame = () => {
     setCurrentPlayer("O");
     setBoard(emptyBoard);
     setWinner(null);
-  }
-
-  const renderIcon = (item) => {
-    if (item === "X") return <i class="bi bi-heart-fill x-icon"></i>;
-    if (item === "O") return <i class="bi bi-star-fill o-icon"></i>;
-    return null;
   };
-  
+
   return (
-
     <main>
-
       <h1 className='tittle'>Jogo da Velha</h1>
-      
-      <div className={`board ${winner ? "game-over" : ""}`}>
-        {board.map((item, index) => (
-          <div
-            key={index}
-            className={`cell ${item}`}
-            onClick={() => handleClick(index)}
-          >
-            {renderIcon(item)}
-          </div>
-        ))}
-      </div>
-
-      {winner &&
-        <footer>
-        {winner === "E" ?
-          <h2 className='winner-message'>
-            <span className={winner}> Deu Velha!</span>
-          </h2>
-          :
-          <h2 className='winner-message'>
-            {renderIcon(winner)} venceu!
-          </h2>
-        }
-        <button onClick={resetGame}>Recomeçar Jogo</button>
-      </footer>
-      }
+      <Board board={board} handleClick={handleClick} />
+      {winner && <WinnerMessage winner={winner} resetGame={resetGame} />}
     </main>
   );
 }
 
-export default TicTacToe
+export default TicTacToe;
